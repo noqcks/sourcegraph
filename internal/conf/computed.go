@@ -9,7 +9,6 @@ import (
 
 	"github.com/hashicorp/cronexpr"
 
-	"github.com/sourcegraph/sourcegraph/cmd/frontend/envvar"
 	"github.com/sourcegraph/sourcegraph/internal/conf/confdefaults"
 	"github.com/sourcegraph/sourcegraph/internal/conf/conftypes"
 	"github.com/sourcegraph/sourcegraph/internal/conf/deploy"
@@ -910,16 +909,6 @@ const embeddingsMaxFileSizeBytes = 1000000
 // GetEmbeddingsConfig evaluates a complete embeddings configuration based on
 // site configuration. The configuration may be nil if completions is disabled.
 func GetEmbeddingsConfig(siteConfig schema.SiteConfiguration) *conftypes.EmbeddingsConfig {
-	// If cody is disabled, don't use embeddings.
-	if !codyEnabled(siteConfig) {
-		return nil
-	}
-
-	// Only allow embeddings on dotcom
-	if !envvar.SourcegraphDotComMode() {
-		return nil
-	}
-
 	// If embeddings are explicitly disabled (legacy flag, TODO: remove after 5.1),
 	// don't use embeddings either.
 	if siteConfig.Embeddings != nil && siteConfig.Embeddings.Enabled != nil && !*siteConfig.Embeddings.Enabled {

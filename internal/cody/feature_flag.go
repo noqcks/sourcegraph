@@ -12,9 +12,6 @@ import (
 	"github.com/sourcegraph/sourcegraph/internal/conf"
 	"github.com/sourcegraph/sourcegraph/internal/conf/conftypes"
 	"github.com/sourcegraph/sourcegraph/internal/database"
-	"github.com/sourcegraph/sourcegraph/internal/featureflag"
-	"github.com/sourcegraph/sourcegraph/internal/licensing"
-	"github.com/sourcegraph/sourcegraph/internal/rbac"
 	"github.com/sourcegraph/sourcegraph/lib/errors"
 )
 
@@ -47,32 +44,6 @@ func IsCodyEnabled(ctx context.Context, db database.DB) (enabled bool, reason st
 // If CodyPermissions is enabled, RBAC will determine access.
 // Otherwise, all authenticated users are granted access.
 func isCodyEnabled(ctx context.Context, db database.DB) (enabled bool, reason string) {
-	if err := licensing.Check(licensing.FeatureCody); err != nil {
-		return false, "instance license does not allow cody"
-	}
-
-	if !conf.CodyEnabled() {
-		return false, "cody is disabled"
-	}
-
-	// Note: we respect the deprecated feature flag, which was in use before
-	// we had proper RBAC implemented.
-	if conf.CodyRestrictUsersFeatureFlag() {
-		enabled = featureflag.FromContext(ctx).GetBoolOr("cody", false)
-		if enabled {
-			return true, ""
-		}
-		return false, "cody is restricted to feature flag but feature flag is not enabled"
-	}
-
-	if conf.CodyPermissionsEnabled() {
-		// Check if user has cody permission via RBAC
-		err := rbac.CheckCurrentUserHasPermission(ctx, db, rbac.CodyAccessPermission)
-		if err != nil {
-			return false, "user does not have permission " + rbac.CodyAccessPermission
-		}
-		return true, ""
-	}
 	return true, ""
 }
 
