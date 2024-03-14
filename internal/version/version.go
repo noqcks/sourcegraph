@@ -17,7 +17,7 @@ var devTimestamp = strconv.FormatInt(time.Now().Unix(), 10) // build timestamp f
 // -ldflags "-X github.com/sourcegraph/sourcegraph/internal/version.version=1.2.3"
 //
 // The version may not be semver-compatible, e.g. `insiders` or `65769_2020-06-05_9bd91a3`.
-var version = devVersion
+var version = "5.3.1"
 
 func init() {
 	exportedVersion := expvar.NewString("sourcegraph.version")
